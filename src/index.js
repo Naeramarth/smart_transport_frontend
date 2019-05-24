@@ -2,150 +2,163 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-class Square extends React.Component {
+class Error extends React.Component {
     render() {
-        return (
-            <button className="square" onClick={this.props.onClick}>
-                {this.props.value}
-            </button>
-        );
+        return <div class="error">Error</div>;
     }
 }
-
-class Board extends React.Component {
-    renderSquare(i) {
-        return (
-            <Square
-                value={this.props.squares[i]}
-                onClick={() => this.props.onClick(i)}
-            />
-        );
-    }
-
+class Loading extends React.Component {
     render() {
         return (
-            <div>
-                <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
-                </div>{" "}
-                <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
-                </div>{" "}
-                <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
-                </div>{" "}
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin" />
             </div>
         );
     }
 }
 
-class Game extends React.Component {
+class Map extends React.Component {
+    render() {
+        return <div />;
+    }
+}
+
+class Status extends React.Component {
+    render() {
+        return <div />;
+    }
+}
+
+class DeviceDetails extends React.Component {
+    render() {
+        return <div />;
+    }
+}
+
+class Device extends React.Component {
+    render() {
+        let name = this.props.name;
+        let status = this.props.status;
+        let color;
+        if (status == 0) {
+            color = "deviceStatus green";
+        } else if (status == 1) {
+            color = "deviceStatus yellow";
+        } else {
+            color = "deviceStatus red";
+        }
+        return (
+            <div class="deviceWrapper">
+                <div class={color}>
+                    <i class="fas fa-circle" />
+                </div>
+                <div class="deviceName">{name}</div>
+                <div class="deviceMenu">
+                    <i class="fas fa-ellipsis-v" />
+                </div>
+            </div>
+        );
+    }
+}
+
+class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            history: [
-                {
-                    squares: Array(9).fill(null)
-                }
-            ],
-            stepNumber: 0,
-            xIsNext: true
+            loading: true
         };
+        this.devices = [];
     }
 
-    handleClick(i) {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length - 1];
-        const squares = current.squares.slice();
-        if (calculateWinner(squares) || squares[i]) {
-            return;
+    componentDidMount() {
+        //TODO get Data from backend
+        for (let i = 1; i <= 20; i++) {
+            this.devices.push({
+                name: "Gerät " + i,
+                status: Math.floor(Math.random() * 3)
+            });
         }
-        squares[i] = this.state.xIsNext ? "X" : "O";
-        this.setState({
-            history: history.concat([
-                {
-                    squares: squares
-                }
-            ]),
-            stepNumber: history.length,
-            xIsNext: !this.state.xIsNext
-        });
-    }
-
-    jumpTo(step) {
-        this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2) === 0
-        });
+        setTimeout(() => {
+            this.setState({
+                loading: false
+            });
+        }, 1000);
     }
 
     render() {
-        const history = this.state.history;
-        const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
-
-        const moves = history.map((step, move) => {
-            const desc = move ? "Go to move #" + move : "Go to game start";
-            return (
-                <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
-                </li>
-            );
-        });
-
-        let status;
-        if (winner) {
-            status = "Winner: " + winner;
+        let content;
+        if (this.state.loading) {
+            content = <Loading />;
         } else {
-            status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+            content = this.devices.map(device => (
+                <Device name={device.name} status={device.status} />
+            ));
         }
 
+        return <div class="dashboard">{content}</div>;
+    }
+}
+
+class Sidebar extends React.Component {
+    render() {
+        let shownButtons = this.props.buttons.map(button => (
+            <div class="sidebarButtonWrapper" key={button.name}>
+                <div class="sidebarButton">
+                    <i class={button.symbol} />
+                </div>
+            </div>
+        ));
+
+        return <div class="sidebar">{shownButtons}</div>;
+    }
+}
+
+class Title extends React.Component {
+    render() {
+        return <div class="title">{this.props.name}</div>;
+    }
+}
+
+class Main extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            shown: "Dashboard"
+        };
+    }
+
+    render() {
+        let content;
+        if (this.state.shown == "Dashboard") {
+            content = <Dashboard />;
+        } else if (this.state.shown == "Map") {
+            content = <Map />;
+        } else if (this.state.shown == "Device") {
+            content = <DeviceDetails />;
+        } else {
+            content = <Error />;
+        }
+
+        let buttons = [
+            {
+                name: "Dashboard",
+                symbol: "fas fa-tachometer-alt"
+            },
+            {
+                name: "Map",
+                symbol: "fas fa-map-marker-alt"
+            }
+        ];
         return (
-            <div className="game">
-                <div className="game-board">
-                    <Board
-                        squares={current.squares}
-                        onClick={i => this.handleClick(i)}
-                    />
-                </div>{" "}
-                <div className="game-info">
-                    <div> {status} </div> <ol> {moves} </ol>{" "}
-                </div>{" "}
+            <div class="main">
+                <Sidebar buttons={buttons} />
+                <div class="mainContainer">
+                    <Title name="Smart Transport" />
+                    {content}
+                </div>
             </div>
         );
     }
 }
 
-function calculateWinner(squares) {
-    const lines = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6]
-    ];
-    for (let i = 0; i < lines.length; i++) {
-        const [a, b, c] = lines[i];
-        if (
-            squares[a] &&
-            squares[a] === squares[b] &&
-            squares[a] === squares[c]
-        ) {
-            return squares[a];
-        }
-    }
-    return null;
-}
-
-// ========================================
-
-ReactDOM.render(<Game />, document.getElementById("root"));
+ReactDOM.render(<Main />, document.getElementById("root"));
