@@ -59,6 +59,7 @@ body {
     height: 100%;
     width: 100%;
     flex-direction: column;
+    overflow-y: scroll;
 }
 
 .title {
@@ -88,13 +89,38 @@ body {
 
 .deviceWrapper {
     flex: 0 0 31.67%;
-    display: flex;
+    width: 31.67%;
     margin: 1em;
     border: 1px solid black;
-    height: 5em;
     border-radius: 0.5em;
-    align-items: center;
     cursor: pointer;
+}
+
+.deviceHead {
+    display: flex;
+    height: 5em;
+    align-items: center;
+    width: 100%;
+}
+
+.deviceBody {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0.5em 0.5em 0.5em 1em;
+}
+
+.deviceStatWrapper {
+    flex: 0 0 40%;
+    display: flex;
+    margin: 0.5em;
+}
+
+.deviceSubStatus {
+    margin-right: 0.5em;
+}
+
+.subStatWrapper {
+    margin: 1em 0 0 0;
 }
 
 .deviceStatus {
@@ -124,6 +150,10 @@ body {
 }
 
 .deviceWrapper:hover .deviceName {
+    color: grey;
+}
+
+.deviceWrapper:hover .deviceStatWrapper {
     color: grey;
 }
 
