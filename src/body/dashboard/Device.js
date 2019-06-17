@@ -7,6 +7,7 @@ class Device extends React.Component {
         let name = this.props.name;
         let status = this.props.status;
         let data = this.props.data;
+        let id = this.props.id;
         let color;
         if (status === 0) {
             color = "deviceStatus green";
@@ -24,7 +25,7 @@ class Device extends React.Component {
             />
         ));
         return (
-            <div class="deviceWrapper">
+            <div class="deviceWrapper" onClick={() => this.props.onClick(id)}>
                 <div class="deviceHead">
                     <Status color={color} />
                     <div class="deviceName">{name}</div>

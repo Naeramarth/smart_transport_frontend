@@ -1,18 +1,19 @@
 import React from "react";
-import Status from "./Status";
+import Status from "../Status";
+import DeviceStat from "../DeviceStat";
 
-class DeviceStat extends React.Component {
+class DeviceDetailsStat extends React.Component {
     render() {
         let name = this.props.name;
         let value = this.props.value;
         let status = this.props.status;
         let color;
         if (status === 0) {
-            color = "deviceSubStatus green";
+            color = "deviceDetailsStatus green";
         } else if (status === 1) {
-            color = "deviceSubStatus yellow";
+            color = "deviceDetailsStatus yellow";
         } else {
-            color = "deviceSubStatus red";
+            color = "deviceDetailsStatus red";
         }
         let content = value;
         if (Array.isArray(value)) {
@@ -24,18 +25,18 @@ class DeviceStat extends React.Component {
                     status={valueEntry.status}
                 />
             ));
-            content = (<div class="subStatWrapper">{subContent}</div>);
+            content = (<div class="detailsStatWrapper">{subContent}</div>);
         }
         return (
-            <div class="deviceStatWrapper">
-                <Status color={color} />
-                <div class="stat">
-                    {name}:&nbsp;
-                    {content}
+            <div class="deviceDetailsStat">
+                <div class="deviceDetailsHead">
+                    <Status color={color} />
+                    <div class="deviceDetailsname">{name}</div>
                 </div>
+                <div class="deviceDetailsBody">{content}</div>
             </div>
         );
     }
 }
 
-export default DeviceStat;
+export default DeviceDetailsStat;
