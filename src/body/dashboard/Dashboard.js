@@ -1,9 +1,9 @@
 import React from "react";
 import Device from "./Device";
 import Loading from "../Loading";
+import NewDevice from "./NewDevice";
 
 class Dashboard extends React.Component {
-    
     constructor(props) {
         super(props);
         this.state = {
@@ -34,7 +34,12 @@ class Dashboard extends React.Component {
             ));
         }
 
-        return <div class="dashboard">{content}</div>;
+        return (
+            <div class="dashboard">
+                {content}
+                <NewDevice onclick={() => this.props.newDevice()} />
+            </div>
+        );
     }
 }
 

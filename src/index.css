@@ -28,9 +28,15 @@ body {
 }
 
 .sidebar {
+    display: flex;
+    flex-direction: column;
     width: 5em;
     padding: 1em;
     background-color: slategrey;
+}
+
+.sidebarButtons {
+    flex: 1;
 }
 
 .sidebarButtonWrapper {
@@ -45,7 +51,7 @@ body {
     cursor: pointer;
 }
 
-.sidebarButtonWrapper:hover{
+.sidebarButtonWrapper:hover {
     background-color: darkgrey;
 }
 
@@ -147,6 +153,10 @@ body {
     color: red;
 }
 
+.grey {
+    color: grey;
+}
+
 .deviceName {
     font-size: 150%;
     flex: 1 1 100%;
@@ -172,7 +182,7 @@ body {
     cursor: pointer;
 }
 
-.deviceMenu:hover{
+.deviceMenu:hover {
     color: lightgrey;
 }
 
@@ -192,10 +202,11 @@ body {
 }
 
 .deviceDetailsStat {
-    flex: 0 0 48.35%;
+    flex: 0 0 48%;
     margin: 1em;
     border: 1px solid black;
     border-radius: 0.5em;
+    height: fit-content;
 }
 
 .deviceDetailsHead {
@@ -220,9 +231,12 @@ body {
     flex-wrap: wrap;
     margin: 1em 0.5em 1em 1.5em;
     font-size: 125%;
+    height: 100%;
+    flex-direction: column;
 }
 
 .mapContainer {
+    width: 100%;
     height: 100%;
     display: flex;
 }
@@ -231,4 +245,182 @@ body {
     width: 100%;
     display: flex;
     margin: 0.5em;
+}
+
+.login {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.loginDetailsWrapper {
+    display: flex;
+    width: 16%;
+    margin: 1em;
+    align-items: center;
+}
+
+.label {
+    flex: 0 0 0%;
+    font-size: 1.5em;
+}
+
+.loginInputWrapper {
+    flex: 1 1 100%;
+}
+
+input {
+    float: right;
+    border: 1px black solid;
+    border-radius: 0.25em;
+    padding: 0.25em 0.5em;
+}
+
+.loginButton {
+    margin: 1em;
+    margin-bottom: 5em;
+    border: 1px black solid;
+    padding: 0.5em 1.5em;
+    border-radius: 0.25em;
+    cursor: pointer;
+}
+
+.loginButton:hover {
+    border-color: grey;
+    color: grey
+}
+
+.logout {
+    font-size: 110%;
+    color: lightgrey;
+    width: 100%;
+    text-align: center;
+    border: 1px lightgrey solid;
+    padding: 0.25em 0em;
+    border-radius: 0.25em;
+    cursor: pointer;
+    margin-bottom: 0.25em;
+}
+
+.logout:hover {
+    border-color: darkgrey;
+    color: darkgrey;
+}
+
+.newDeviceWrapper {
+    flex: 0 0 31.67%;
+    margin: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 18.53em;
+}
+
+.newDevice {
+    font-size: 750%;
+    cursor: pointer;
+    color: grey;
+}
+
+.newDevice:hover {
+    color: darkgrey;
+}
+
+.deviceDetailsMap {
+    height: 30em;
+    width: 100%;
+}
+
+.deviceManagerInputWrapper {
+    flex: 1 1 100%;
+}
+
+.deviceManagerElement {
+    display: flex;
+    width: 25em;
+    align-items: center;
+    margin: 1em;
+}
+
+.sensorSelectionWrapper {
+    display: flex;
+    flex-direction: column;
+    width: 25em;
+    margin: 1em;
+}
+
+.deviceManager {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding-bottom: 10em;
+}
+
+.sensorSelection {
+    margin: 1em;
+    font-size: 90%;
+}
+
+.sensorSelector {
+    display: flex;
+    align-items: baseline;
+    margin: 0.5em;
+}
+
+.checkboxWrapper {
+    flex: 1;
+}
+
+.checkbox {
+    cursor: pointer;
+    font-size: 125%;
+    float: right;
+}
+
+.checkbox:hover {
+    color: grey;
+}
+
+.editButton {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 1em;
+    height: 3em;
+    width: 3em;
+    background-color: darkgrey;
+    border-radius: 5em;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.editButton:hover {
+    background-color: lightgrey;
+}
+
+.doneButton {
+    margin: 1em;
+    margin-bottom: 5em;
+    border: 1px black solid;
+    padding: 0.5em 1.5em;
+    border-radius: 0.25em;
+    cursor: pointer;
+}
+
+.doneButton:hover {
+    border-color: grey;
+    color: grey;
+}
+
+.graphWrapper {
+    margin-top: 1em;
 }

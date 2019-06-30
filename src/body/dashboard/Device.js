@@ -10,8 +10,10 @@ class Device extends React.Component {
         let id = this.props.id;
         let color;
         if (status === 0) {
-            color = "deviceStatus green";
+            color = "deviceStatus grey";
         } else if (status === 1) {
+            color = "deviceStatus green";
+        } else if (status === 2){
             color = "deviceStatus yellow";
         } else {
             color = "deviceStatus red";
@@ -21,7 +23,12 @@ class Device extends React.Component {
                 key={index}
                 name={dataEntry.name}
                 value={dataEntry.value}
+                available={dataEntry.available}
+                suffix={dataEntry.suffix}
+                prefix={dataEntry.prefix}
                 status={dataEntry.status}
+                positionData={dataEntry.positionData}
+                active={dataEntry.active}
             />
         ));
         return (

@@ -8,8 +8,10 @@ class Title extends React.Component {
         let statusField = <div />;
         if (status !== -1) {
             if (status === 0) {
-                color = "titleStatus green";
+                color = "titleStatus grey";
             } else if (status === 1) {
+                color = "titleStatus green";
+            } else if (status === 2){
                 color = "titleStatus yellow";
             } else {
                 color = "titleStatus red";
