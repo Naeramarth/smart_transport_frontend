@@ -13,10 +13,17 @@ class Login extends React.Component {
                 <div class="loginDetailsWrapper">
                     <div class="label">Password:</div>
                     <div class="loginInputWrapper">
-                        <input class="password loginInput" />
+                        <input class="password loginInput" type="password" />
                     </div>
                 </div>
-                <div class="loginButton" onClick={()=>{this.props.onclick()}}>Login</div>
+                <div
+                    class="loginButton"
+                    onClick={() => {
+                        this.props.onclick();
+                    }}
+                >
+                    Login
+                </div>
             </div>
         );
     }

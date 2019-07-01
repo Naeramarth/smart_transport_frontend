@@ -10,6 +10,7 @@ import Error from "./Error";
 import Loading from "./body/Loading";
 import Login from "./body/login/Login";
 import DeviceManager from "./body/deviceManager/DeviceManager";
+import {HubConnectionBuilder, LogLevel} from "@aspnet/signalr";
 
 class Main extends React.Component {
     constructor(props) {
@@ -85,7 +86,7 @@ class Main extends React.Component {
                         timestamp: data[i].timestamp,
                         value: JSON.parse(JSON.stringify(data[i].value))
                     });
-                    if(data[i].history.length > 100){
+                    if (data[i].history.length > 100) {
                         data[i].history.shift();
                     }
                 } else {
@@ -282,7 +283,22 @@ class Main extends React.Component {
         if (this.interval) {
             clearInterval(this.interval);
         }
-        this.interval = setInterval(() => this.createValues(), 1000);
+        //this.interval = setInterval(() => this.createValues(), 1000);
+
+
+        const hubConnection = new HubConnectionBuilder()
+            .withUrl("http://localhost:5000/valueHub")
+            .configureLogging(LogLevel.Information)
+            .build();
+
+        this.setState({ hubConnection }, () => {
+            this.state.hubConnection.start().then(function() {
+                console.log("connected");
+            });
+            this.state.hubConnection.on("ReceiveMessage", (user, message) => {
+                console.log(user + ": " + message);
+            });
+        });
     }
 
     render() {

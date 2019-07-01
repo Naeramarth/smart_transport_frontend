@@ -26,16 +26,6 @@ class DeviceManager extends React.Component {
         return (
             <div class="deviceManager">
                 <div class="deviceManagerElement">
-                    <div class="label">Gerät-ID</div>
-                    <div class="deviceManagerInputWrapper">
-                        <input
-                            class="devicename deviceNameInput"
-                            value={device.id}
-                            onChange={(event) => this.props.changeId(event.target.value, this.props.id)}
-                        />
-                    </div>
-                </div>
-                <div class="deviceManagerElement">
                     <div class="label">Gerätname</div>
                     <div class="deviceManagerInputWrapper">
                         <input
