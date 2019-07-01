@@ -10,7 +10,7 @@ import Error from "./Error";
 import Loading from "./body/Loading";
 import Login from "./body/login/Login";
 import DeviceManager from "./body/deviceManager/DeviceManager";
-import {HubConnectionBuilder, LogLevel} from "@aspnet/signalr";
+import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
 
 class Main extends React.Component {
     constructor(props) {
@@ -285,9 +285,8 @@ class Main extends React.Component {
         }
         //this.interval = setInterval(() => this.createValues(), 1000);
 
-
         const hubConnection = new HubConnectionBuilder()
-            .withUrl("http://localhost:5000/valueHub")
+            .withUrl("http://localhost:5000/valueshub")
             .configureLogging(LogLevel.Information)
             .build();
 
