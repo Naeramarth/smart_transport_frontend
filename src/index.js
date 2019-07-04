@@ -133,6 +133,13 @@ class Main extends React.Component {
                 if (value === undefined || value === null) {
                     return;
                 }
+                if (data.positionData) {
+                    value.lat = value.lat / 1000000000;
+                    value.lon = value.lon / 1000000000;
+                    if (isNaN(value.lat) || isNaN(value.lon)) {
+                        return;
+                    }
+                }
                 if (data.available) {
                     data.history.push({
                         timestamp: data.timestamp,
@@ -386,46 +393,69 @@ class Main extends React.Component {
         this.startConnection();
         for (let device of this.state.devices) {
             for (let sensor of device.data) {
-                this.restCall("values/" + device.id + "/" + sensor.id, data => {
-                    let total = 0;
-                    for (let entry of data) {
-                        total += entry.Value;
-                    }
-                    let subHistory = data.slice(data.length - 100, data.length);
-                    let history = [];
-                    for (let entry of subHistory) {
-                        history.push({
-                            timestamp: new Date(entry.Timestamp),
-                            value: entry.Value
-                        });
-                    }
-                    this.editDeviceData(
-                        device.id,
-                        sensor.id,
-                        deviceData => {
-                            deviceData.total = total;
-                            deviceData.totalLength = data.length;
-                            deviceData.history = history;
-                        },
-                        () => {
-                            if (data.length === 0) {
-                                return;
+                if (sensor.positionData) {
+                    this.restCall("position/" + device.id, data => {
+                        this.enterData(
+                            device.id,
+                            sensor.id,
+                            { lon: data.lon, lat: data.lat },
+                            data.Timestamp,
+                            () => {
+                                this.startConnectionListener(
+                                    sensor.trigger,
+                                    sensor.id
+                                );
                             }
-                            this.enterData(
+                        );
+                    });
+                } else {
+                    this.restCall(
+                        "values/" + device.id + "/" + sensor.id,
+                        data => {
+                            let total = 0;
+                            for (let entry of data) {
+                                total += entry.Value;
+                            }
+                            let subHistory = data.slice(
+                                data.length - 100,
+                                data.length
+                            );
+                            let history = [];
+                            for (let entry of subHistory) {
+                                history.push({
+                                    timestamp: new Date(entry.Timestamp),
+                                    value: entry.Value
+                                });
+                            }
+                            this.editDeviceData(
                                 device.id,
                                 sensor.id,
-                                data[data.length - 1].Value,
-                                data[data.length - 1].Timestamp,
+                                deviceData => {
+                                    deviceData.total = total;
+                                    deviceData.totalLength = data.length;
+                                    deviceData.history = history;
+                                },
                                 () => {
-                                    this.startConnectionListener(
-                                        sensor.trigger,
-                                        sensor.id
+                                    if (data.length === 0) {
+                                        return;
+                                    }
+                                    this.enterData(
+                                        device.id,
+                                        sensor.id,
+                                        data[data.length - 1].Value,
+                                        data[data.length - 1].Timestamp,
+                                        () => {
+                                            this.startConnectionListener(
+                                                sensor.trigger,
+                                                sensor.id
+                                            );
+                                        }
                                     );
                                 }
                             );
                         }
                     );
-                });
+                }
             }
         }
     }
@@ -525,25 +555,30 @@ class Main extends React.Component {
     }
 
     resetDevice(id) {
-        this.restCall("device/resetDevice/" + id, (data) => {
-            if(data){
-                this.editDevice(device=>{
-                    device.status = 0;
-                    for(let data of device.data){
-                        data.history = [];
-                        if(data.vib){
-                            data.value = 0;
-                            data.status = 1;
-                            data.available = true;
-                        }else{
-                            data.value = "";
-                            data.status = 0;
-                            data.available = false;
+        this.restCall(
+            "device/resetDevice/" + id,
+            data => {
+                if (data) {
+                    this.editDevice(device => {
+                        device.status = 0;
+                        for (let data of device.data) {
+                            data.history = [];
+                            if (data.vib) {
+                                data.value = 0;
+                                data.status = 1;
+                                data.available = true;
+                            } else {
+                                data.value = "";
+                                data.status = 0;
+                                data.available = false;
+                            }
                         }
-                    }
-                });
-            }
-        }, () => {}, "get");
+                    });
+                }
+            },
+            () => {},
+            "get"
+        );
     }
 
     componentDidMount() {
