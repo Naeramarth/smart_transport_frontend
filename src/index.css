@@ -397,11 +397,8 @@ input {
     color: grey;
 }
 
-.editButton {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    margin: 1em;
+.deviceButton {
+    margin: 1em 1em 1em 0;
     height: 3em;
     width: 3em;
     background-color: darkgrey;
@@ -414,7 +411,14 @@ input {
     cursor: pointer;
 }
 
-.editButton:hover {
+.buttonWrapper {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+}
+
+.deviceButton:hover {
     background-color: lightgrey;
 }
 

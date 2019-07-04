@@ -45,8 +45,13 @@ class DeviceDetails extends React.Component {
         return (
             <div className="deviceDetails">
                 {content}
-                <div className="editButton" onClick={() => this.props.editDevice()}>
-                    <i className="far fa-edit" />
+                <div className="buttonWrapper">
+                    <div className="deviceButton" onClick={() => this.props.editDevice()}>
+                        <i className="far fa-edit" />
+                    </div>
+                    <div className="deviceButton" onClick={() => this.props.deleteDevice()}>
+                        <i className="far fa-trash-alt"></i>
+                    </div>
                 </div>
             </div>
         );

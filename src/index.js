@@ -453,14 +453,16 @@ class Main extends React.Component {
             () => {
                 this.restCall("device/" + this.state.kdNr, data => {
                     this.editDevices(devices => {
-                        devices[devices.length - 1].id = data[data.length - 1].Id;
+                        devices[devices.length - 1].id =
+                            data[data.length - 1].Id;
                     });
                 });
             },
             () => {
                 this.restCall("device/" + this.state.kdNr, data => {
                     this.editDevices(devices => {
-                        devices[devices.length - 1].id = data[data.length - 1].Id;
+                        devices[devices.length - 1].id =
+                            data[data.length - 1].Id;
                     });
                 });
             },
@@ -516,6 +518,15 @@ class Main extends React.Component {
                 );
             }
         }
+    }
+
+    deleteDevice(id){
+        this.restCall(
+            "device/" + id,
+            () => {},
+            () => {},
+            "delete"
+        );
     }
 
     componentDidMount() {
@@ -603,6 +614,18 @@ class Main extends React.Component {
                     device={devices[selected]}
                     editDevice={() => {
                         this.openDeviceManager(() => {});
+                    }}
+                    deleteDevice={() => {
+                        let confirmed = window.confirm("Sind Sie sicher, dass Sie dieses Gerät löschen wollen?");
+                        if(!confirmed){
+                            return;
+                        }
+                        this.openDashboard(()=>{
+                            this.editDevices((devices)=>{
+                                let deleted = devices.splice(selected, 1);
+                                this.deleteDevice(deleted[0].id);
+                            })
+                        });
                     }}
                 />
             );

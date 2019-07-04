@@ -1,13 +1,4 @@
-signalR lernen
-
 gerätreset
-
-sensoren:
-
-cpu & ram weg, batterie dazu
-
-druck dazu
-
 
 optional:
  - einzelne werte löschen
