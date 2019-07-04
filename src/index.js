@@ -121,6 +121,10 @@ class Main extends React.Component {
         );
     }
 
+    openDeviceManager(callback) {
+        this.setState({ shown: "DeviceManager" }, () => callback());
+    }
+
     enterData(deviceId, id, value, timestamp, callback) {
         this.editDeviceData(
             deviceId,
@@ -443,6 +447,77 @@ class Main extends React.Component {
         });
     }
 
+    createDevice(devices) {
+        this.restCall(
+            "device",
+            () => {
+                this.restCall("device/" + this.state.kdNr, data => {
+                    this.editDevices(devices => {
+                        devices[devices.length - 1].id = data[data.length - 1].Id;
+                    });
+                });
+            },
+            () => {
+                this.restCall("device/" + this.state.kdNr, data => {
+                    this.editDevices(devices => {
+                        devices[devices.length - 1].id = data[data.length - 1].Id;
+                    });
+                });
+            },
+            "post",
+            {
+                Bezeichnung: "",
+                KdNr: this.state.kdNr
+            }
+        );
+    }
+
+    updateDevice(devices, selected, id, changedSensors) {
+        this.restCall(
+            "device/" + devices[selected].id,
+            () => {},
+            () => {},
+            "put",
+            {
+                Bezeichnung: this.state.devices[selected].id
+            }
+        );
+        for (let changedSensor of changedSensors) {
+            let sensor = devices[selected].data[id];
+            if (changedSensor.active) {
+                this.restCall(
+                    "config",
+                    () => {
+                        this.restCall(
+                            "config/" + devices[selected].id,
+                            data => {
+                                for (let newSensor of data) {
+                                    if (newSensor.Sensortype === sensor.id) {
+                                        sensor.sensorId = newSensor.Id;
+                                        return;
+                                    }
+                                }
+                            }
+                        );
+                    },
+                    () => {},
+                    "post",
+                    {
+                        Sensortype: sensor.id,
+                        deviceId: devices[selected].id
+                    }
+                );
+            } else {
+                this.restCall(
+                    "config/" + sensor.sensorId,
+                    () => {},
+                    () => {},
+                    "delete"
+                );
+            }
+        }
+    }
+
     componentDidMount() {
         this.openLogin(() => {});
     }
@@ -494,14 +569,20 @@ class Main extends React.Component {
                     devices={devices}
                     onClick={device => this.openDetails(device, () => {})}
                     newDevice={() => {
-                        let devices = this.state.devices.concat(
+                        devices = this.state.devices.concat(
                             this.newEmptyDevice()
                         );
-                        this.setState({
-                            shown: "DeviceManager",
-                            devices: devices,
-                            selected: devices.length - 1
-                        });
+                        selected = devices.length - 1;
+                        this.createDevice(devices);
+                        this.setState(
+                            {
+                                devices: devices,
+                                selected: selected
+                            },
+                            () => {
+                                this.openDeviceManager(() => {});
+                            }
+                        );
                     }}
                     customer={this.state.customer}
                 />
@@ -521,7 +602,7 @@ class Main extends React.Component {
                 <DeviceDetails
                     device={devices[selected]}
                     editDevice={() => {
-                        this.setState({ shown: "DeviceManager" });
+                        this.openDeviceManager(() => {});
                     }}
                 />
             );
@@ -547,48 +628,23 @@ class Main extends React.Component {
                     error={() => this.openDashboard(() => {})}
                     done={id => this.openDetails(id, () => {})}
                     changeName={(value, id) => {
-                        this.editDevice(id, device => {
-                            device.name = value;
+                        this.editDevices(devices => {
+                            devices[id].name = value;
                         });
                     }}
                     changeData={(value, id) => {
-                        this.editDevice(id, device => {
-                            device.data = value;
+                        this.editDevices(devices => {
+                            devices[id].data = value;
                         });
                     }}
                     done={(id, changedSensors) => {
-                        this.restCall(
-                            "device/" + devices[selected].id,
-                            () => {},
-                            () => {},
-                            "put",
-                            {
-                                Bezeichnung: this.state.devices[selected].id
-                            }
+                        this.updateDevice(
+                            devices,
+                            selected,
+                            id,
+                            changedSensors
                         );
-                        for (let changedSensor of changedSensors) {
-                            let sensor = devices[selected].data[id];
-                            if (changedSensor.active) {
-                                this.restCall(
-                                    "config",
-                                    () => {},
-                                    () => {},
-                                    "post",
-                                    {
-                                        Sensortype: sensor.id,
-                                        deviceId: devices[selected].id
-                                    }
-                                );
-                            } else {
-                                this.restCall(
-                                    "config/" + sensor.sensorId,
-                                    () => {},
-                                    () => {},
-                                    "delete"
-                                );
-                            }
-                        }
-                        this.openDetails(selected, ()=>{});
+                        this.openDetails(selected, () => {});
                     }}
                 />
             );

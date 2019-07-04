@@ -36,9 +36,6 @@ class Device extends React.Component {
                 <div className="deviceHead">
                     <Status color={color} />
                     <div className="deviceName">{name}</div>
-                    <div className="deviceMenu">
-                        <i className="fas fa-ellipsis-v" />
-                    </div>
                 </div>
                 <div className="deviceBody">{content}</div>
             </div>
