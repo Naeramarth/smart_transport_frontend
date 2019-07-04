@@ -52,7 +52,9 @@ class Main extends React.Component {
             .then(this.status)
             .then(this.json)
             .then(data => {
-                callback(data);
+                if (callback) {
+                    callback(data);
+                }
             })
             .catch(function(error) {
                 if (errorCallback) {
@@ -142,6 +144,21 @@ class Main extends React.Component {
                         return;
                     }
                 }
+                if (data.id === "vib") {
+                    if (value) {
+                        value = 1;
+                    } else {
+                        value = 0;
+                    }
+                }
+                data.value = value;
+                data.total += value;
+                data.totalLength += 1;
+                data.timestamp = timestamp;
+                data.status = this.determineStatus(
+                    data.total / data.totalLength,
+                    value
+                );
                 if (data.available) {
                     data.history.push({
                         timestamp: data.timestamp,
@@ -153,14 +170,6 @@ class Main extends React.Component {
                 } else {
                     data.available = true;
                 }
-                data.value = value;
-                data.total += value;
-                data.totalLength += 1;
-                data.timestamp = timestamp;
-                data.status = this.determineStatus(
-                    data.total / data.totalLength,
-                    value
-                );
                 this.setDeviceStatus(deviceId);
             },
             callback
@@ -240,6 +249,7 @@ class Main extends React.Component {
                     available: true,
                     status: 1,
                     minimum: 0,
+                    maximum: 1,
                     history: []
                 },
                 {
@@ -392,7 +402,6 @@ class Main extends React.Component {
     }
 
     loadValues() {
-        this.startConnection();
         for (let device of this.state.devices) {
             for (let sensor of device.data) {
                 if (sensor.positionData) {
@@ -401,13 +410,7 @@ class Main extends React.Component {
                             device.id,
                             sensor.id,
                             { lon: data.lon, lat: data.lat },
-                            data.Timestamp,
-                            () => {
-                                this.startConnectionListener(
-                                    sensor.trigger,
-                                    sensor.id
-                                );
-                            }
+                            new Date(data.Timestamp)
                         );
                     });
                 } else {
@@ -418,10 +421,7 @@ class Main extends React.Component {
                             for (let entry of data) {
                                 total += entry.Value;
                             }
-                            let subHistory = data.slice(
-                                data.length - 100,
-                                data.length
-                            );
+                            let subHistory = data.slice(0, 100).reverse();
                             let history = [];
                             for (let entry of subHistory) {
                                 history.push({
@@ -444,14 +444,10 @@ class Main extends React.Component {
                                     this.enterData(
                                         device.id,
                                         sensor.id,
-                                        data[data.length - 1].Value,
-                                        data[data.length - 1].Timestamp,
-                                        () => {
-                                            this.startConnectionListener(
-                                                sensor.trigger,
-                                                sensor.id
-                                            );
-                                        }
+                                        data[0].Value,
+                                        new Date(
+                                            data[0].Timestamp
+                                        )
                                     );
                                 }
                             );
@@ -461,6 +457,7 @@ class Main extends React.Component {
             }
             this.setDeviceStatus(device.id);
         }
+        this.startConnection();
     }
 
     startConnection() {
@@ -471,6 +468,24 @@ class Main extends React.Component {
 
         this.setState({ hubConnection }, () => {
             this.state.hubConnection.start();
+            this.state.hubConnection.on("ReceiveVib", (user, message) => {
+                this.enterData(user, "vib", message, new Date());
+            });
+            this.state.hubConnection.on("ReceiveHum", (user, message) => {
+                this.enterData(user, "humid", message, new Date());
+            });
+            this.state.hubConnection.on("ReceiveTemp", (user, message) => {
+                this.enterData(user, "temp", message, new Date());
+            });
+            this.state.hubConnection.on("ReceivePre", (user, message) => {
+                this.enterData(user, "preassure", message, new Date());
+            });
+            this.state.hubConnection.on("ReceivePos", (user, message) => {
+                this.enterData(user, "gps", message, new Date());
+            });
+            this.state.hubConnection.on("ReceiveBat", (user, message) => {
+                this.enterData(user, "battery", message, new Date());
+            });
         });
     }
 
@@ -582,6 +597,18 @@ class Main extends React.Component {
 
     componentDidMount() {
         this.openLogin(() => {});
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+        this.interval = setInterval(() => {
+            for (let device of this.state.devices) {
+                for (let data of device.data) {
+                    if (data.id === "vib") {
+                        this.enterData(device.id, data.id, 0, new Date());
+                    }
+                }
+            }
+        }, 5000);
     }
 
     render() {
