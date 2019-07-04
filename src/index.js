@@ -18,6 +18,7 @@ class Main extends React.Component {
         this.defaultTitle = "Smart Transport";
         this.interval = false;
         this.uid = 1;
+        this.vibTimer = false;
         this.state = {
             shown: "Loading",
             devices: [],
@@ -160,11 +161,37 @@ class Main extends React.Component {
                     value
                 );
                 if (data.available) {
-                    data.history.push({
-                        timestamp: data.timestamp,
-                        value: JSON.parse(JSON.stringify(data.value))
-                    });
-                    if (data.history.length > 100) {
+                    if (data.id === "vib") {
+                        if (value) {
+                            if (
+                                timestamp - 1000 >
+                                data.history[data.history.length - 1]
+                            ) {
+                                data.history.push({
+                                    timestamp: timestamp - 1000,
+                                    value: 0
+                                });
+                            }
+                            data.history.push({
+                                timestamp: timestamp,
+                                value: 1
+                            });
+                            if(this.vibTimer){
+                                clearTimeout(this.vibTimer);
+                            }
+                            this.vibTimer = setTimeout(()=>{
+                                this.enterData(deviceId, id, false, new Date());
+                            }, 1000);
+                        } else {
+                            value = 0;
+                        }
+                    } else {
+                        data.history.push({
+                            timestamp: data.timestamp,
+                            value: JSON.parse(JSON.stringify(data.value))
+                        });
+                    }
+                    while (data.history.length > 100) {
                         data.history.shift();
                     }
                 } else {
@@ -421,9 +448,58 @@ class Main extends React.Component {
                             for (let entry of data) {
                                 total += entry.Value;
                             }
+                            if (sensor.id === "vib") {
+                                let arr = [];
+                                for (let i in data) {
+                                    if (data[i].Value) {
+                                        if (
+                                            data[i].Timestamp - 1000 >
+                                            data[i + 1].Timestamp
+                                        ) {
+                                            arr.push({
+                                                Timestamp:
+                                                    data[i].Timestamp - 1000,
+                                                Value: 0
+                                            });
+                                        }
+                                        arr.push({
+                                            Timestamp: data[i].Timestamp,
+                                            Value: 1
+                                        });
+                                        if (
+                                            i !== 0 &&
+                                            data[i].Timestamp + 1000 <
+                                                data[i - 1].Timestamp
+                                        ) {
+                                            arr.push({
+                                                Timestamp:
+                                                    data[i].Timestamp + 1000,
+                                                Value: 0
+                                            });
+                                        }
+                                        if(i === 0){
+                                            arr.push({
+                                                Timestamp:
+                                                    data[i].Timestamp + 1000,
+                                                Value: 0
+                                            });
+                                        }
+                                    } else {
+                                        data[i].Value = 0;
+                                    }
+                                }
+                                data = arr;
+                            }
                             let subHistory = data.slice(0, 100).reverse();
                             let history = [];
                             for (let entry of subHistory) {
+                                if (sensor.id === "vib") {
+                                    if (entry.Value) {
+                                        entry.Value = 1;
+                                    } else {
+                                        entry.Value = 0;
+                                    }
+                                }
                                 history.push({
                                     timestamp: new Date(entry.Timestamp),
                                     value: entry.Value
@@ -445,9 +521,7 @@ class Main extends React.Component {
                                         device.id,
                                         sensor.id,
                                         data[0].Value,
-                                        new Date(
-                                            data[0].Timestamp
-                                        )
+                                        new Date(data[0].Timestamp)
                                     );
                                 }
                             );
