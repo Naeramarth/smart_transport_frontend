@@ -5,19 +5,19 @@ class Sidebar extends React.Component {
     render() {
         let shownButtons = this.props.buttons.map(button => (
             <div
-                class="sidebarButtonWrapper"
+                className="sidebarButtonWrapper"
                 key={button.name}
                 onClick={button.method}
             >
-                <div class="sidebarButton">
-                    <i class={button.symbol} />
+                <div className="sidebarButton">
+                    <i className={button.symbol} />
                 </div>
             </div>
         ));
 
         return (
-            <div class="sidebar">
-                <div class="sidebarButtons">{shownButtons}</div>
+            <div className="sidebar">
+                <div className="sidebarButtons">{shownButtons}</div>
                 <LogoutButton onclick={() => this.props.logout()} />
             </div>
         );

@@ -28,26 +28,13 @@ class DeviceStat extends React.Component {
             color = "deviceSubStatus red";
         }
         let content = prefix + value + suffix;
-        if (Array.isArray(value)) {
-            let subContent = value.map((valueEntry, index) => (
-                <DeviceStat
-                    key={index}
-                    name={valueEntry.name}
-                    value={valueEntry.value}
-                    suffix={valueEntry.suffix}
-                    prefix={valueEntry.prefix}
-                    status={valueEntry.status}
-                    active={valueEntry.active}
-                />
-            ));
-            content = <div class="subStatWrapper">{subContent}</div>;
-        } else if (!this.props.available) {
+        if (!this.props.available) {
             content = "n/a";
         }
         return (
-            <div class="deviceStatWrapper">
+            <div className="deviceStatWrapper">
                 <Status color={color} />
-                <div class="stat">
+                <div className="stat">
                     {name}:&nbsp;
                     {content}
                 </div>

@@ -4,8 +4,8 @@ class Status extends React.Component {
     render() {
         let color = this.props.color;
         return (
-            <div class={color}>
-                <i class="fas fa-circle" />
+            <div className={color}>
+                <i className="fas fa-circle" />
             </div>
         );
     }

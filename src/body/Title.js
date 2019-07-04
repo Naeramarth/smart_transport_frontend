@@ -20,8 +20,9 @@ class Title extends React.Component {
         }
 
         return (
-            <div class="title">
-                <div class="titleWrapper">
+            <div className="title">
+                <div className="customer">{this.props.customer}</div>
+                <div className="titleWrapper">
                     {statusField}
                     {this.props.name}
                 </div>

@@ -17,203 +17,217 @@ class Main extends React.Component {
         super(props);
         this.defaultTitle = "Smart Transport";
         this.interval = false;
+        this.uid = 1;
         this.state = {
             shown: "Loading",
             devices: [],
             selected: -1,
             title: this.defaultTitle,
-            loggedIn: false
+            loggedIn: false,
+            customer: "",
+            sidebar: false
         };
     }
 
-    openDetails(device) {
-        this.setState({
-            shown: "Device",
-            selected: device,
-            title: this.state.devices[device].name
-        });
-    }
-
-    openDashboard() {
-        this.setState({
-            shown: "Dashboard",
-            selected: -1,
-            title: this.defaultTitle
-        });
-    }
-
-    openMap() {
-        this.setState({
-            shown: "Map",
-            selected: -1,
-            title: this.defaultTitle
-        });
-    }
-
-    openLogin() {
-        this.setState({
-            shown: "Login",
-            selected: -1,
-            title: this.defaultTitle,
-            loggedIn: false
-        });
-    }
-
-    enterData(data, id, value, status) {
-        for (let i in data) {
-            if (data[i].id === id) {
-                if (Array.isArray(value)) {
-                    data[i].status = 0;
-                    for (let j in data[i].value) {
-                        let subData = data[i].value[j];
-                        for (let k in value) {
-                            if (subData.id === value[k].id) {
-                                subData.value = value[k].value;
-                                subData.status = value[k].status;
-                                subData.available = true;
-                            }
-                        }
-                        if (subData.status > data[i].status) {
-                            data[i].status = subData.status;
-                        }
-                    }
-                } else {
-                    data[i].status = status;
-                    data[i].value = value;
-                }
-                if (data[i].available) {
-                    data[i].history.push({
-                        timestamp: data[i].timestamp,
-                        value: JSON.parse(JSON.stringify(data[i].value))
-                    });
-                    if (data[i].history.length > 100) {
-                        data[i].history.shift();
-                    }
-                } else {
-                    data[i].available = true;
-                }
-                data[i].timestamp = new Date();
-                return;
-            }
+    status(data) {
+        if (data.status >= 200 && data.status < 300) {
+            return Promise.resolve(data);
+        } else {
+            return Promise.reject(new Error(data.statusText));
         }
     }
 
-    createValues() {
-        this.editDevices(newDevices => {
-            for (let i = 0; i < newDevices.length; i++) {
-                //mockedData START
-                let conValue = Math.floor(Math.random() * 500);
-                let conStatus = conValue < 400 ? 1 : 2;
-                this.enterData(newDevices[i].data, "con", conValue, conStatus);
+    json(data) {
+        return data.json();
+    }
 
-                let tremValue = Math.floor(Math.random() * 5);
-                let tremStatus = tremValue < 4 ? 1 : tremValue < 5 ? 2 : 3;
-                this.enterData(
-                    newDevices[i].data,
-                    "tre",
-                    tremValue,
-                    tremStatus
-                );
-
-                let humValue = Math.floor(Math.random() * 100);
-                let humStatus = humValue < 75 ? 1 : humValue < 90 ? 2 : 3;
-                this.enterData(newDevices[i].data, "hum", humValue, humStatus);
-
-                let tempValue = Math.floor(Math.random() * 45 - 10);
-                let tempStatus =
-                    0 < tempValue && tempValue < 25
-                        ? 1
-                        : -5 < tempValue && tempValue < 30
-                        ? 2
-                        : 3;
-                this.enterData(
-                    newDevices[i].data,
-                    "tem",
-                    tempValue,
-                    tempStatus
-                );
-
-                let cpuValue = Math.floor(Math.random() * 100);
-                let cpuStatus = cpuValue < 75 ? 1 : cpuValue < 90 ? 2 : 3;
-                let ramValue = Math.floor(Math.random() * 100);
-                let ramStatus = ramValue < 75 ? 1 : ramValue < 90 ? 2 : 3;
-                let aSValue = Math.floor(Math.random() * 5 + 1);
-                let aSStatus = aSValue < 2 ? 3 : aSValue < 3 ? 2 : 1;
-                this.enterData(newDevices[i].data, "sys", [
-                    {
-                        id: "cpu",
-                        value: cpuValue,
-                        status: cpuStatus
-                    },
-                    {
-                        id: "ram",
-                        value: ramValue,
-                        status: ramStatus
-                    },
-                    {
-                        id: "acs",
-                        value: aSValue,
-                        status: aSStatus
-                    }
-                ]);
-                let latValue = Math.random() * 6 + 48;
-                let lonValue = Math.random() * 6 + 7;
-                let gpsStatus = 1;
-                this.enterData(
-                    newDevices[i].data,
-                    "gps",
-                    { lon: lonValue, lat: latValue },
-                    gpsStatus
-                );
-                //mockedData END
-
-                let maxStatus = 0;
-                for (let j in newDevices[i].data) {
-                    let singleData = newDevices[i].data[j];
-                    if (singleData.status > maxStatus && singleData.active) {
-                        maxStatus = singleData.status;
-                    }
+    restCall(path, callback, errorCallback, post) {
+        fetch("http://localhost:5000/api/" + path, {
+            method: post ? "post" : "get"
+        })
+            .then(this.status)
+            .then(this.json)
+            .then(data => {
+                callback(data);
+            })
+            .catch(function(error) {
+                if (errorCallback) {
+                    errorCallback();
                 }
-                newDevices[i].status = maxStatus;
+            });
+    }
+
+    openDetails(device, callback) {
+        this.setState(
+            {
+                shown: "Device",
+                selected: device,
+                title: this.state.devices[device].name,
+                sidebar: true
+            },
+            () => callback()
+        );
+    }
+
+    openDashboard(callback) {
+        this.setState(
+            {
+                shown: "Dashboard",
+                selected: -1,
+                title: this.defaultTitle,
+                sidebar: true
+            },
+            () => callback()
+        );
+    }
+
+    openMap(callback) {
+        this.setState(
+            {
+                shown: "Map",
+                selected: -1,
+                title: this.defaultTitle,
+                sidebar: true
+            },
+            () => callback()
+        );
+    }
+
+    openLogin(callback, error) {
+        this.setState(
+            {
+                shown: "Login",
+                selected: -1,
+                title: this.defaultTitle,
+                loggedIn: false,
+                sidebar: false,
+                loginError: error,
+                customer: ""
+            },
+            () => callback()
+        );
+    }
+
+    openLoading(callback) {
+        this.setState(
+            {
+                shown: "Loading"
+            },
+            () => callback()
+        );
+    }
+
+    enterData(deviceId, id, value, timestamp, callback) {
+        this.editDeviceData(
+            deviceId,
+            id,
+            data => {
+                if (value === undefined || value === null) {
+                    return;
+                }
+                if (data.available) {
+                    data.history.push({
+                        timestamp: data.timestamp,
+                        value: JSON.parse(JSON.stringify(data.value))
+                    });
+                    if (data.history.length > 100) {
+                        data.history.shift();
+                    }
+                } else {
+                    data.available = true;
+                }
+                data.value = value;
+                data.total += value;
+                data.totalLength += 1;
+                data.timestamp = timestamp;
+                data.status = this.determineStatus(
+                    data.total / data.totalLength,
+                    value
+                );
+                this.setDeviceStatus(deviceId);
+            },
+            callback
+        );
+    }
+
+    determineStatus(average, value) {
+        return average * 1.5 < value
+            ? 3
+            : average * 1.25 < value
+            ? 2
+            : average * 0.5 > value
+            ? 3
+            : average * 0.75 > value
+            ? 2
+            : 1;
+    }
+
+    setDeviceStatus(deviceId) {
+        this.editDevice(deviceId, (device) => {
+            let maxStatus = 0;
+            for (let singleData of device.data) {
+                if (singleData.status > maxStatus && singleData.active) {
+                    maxStatus = singleData.status;
+                }
             }
+            device.status = maxStatus;
         });
     }
 
-    editDevices(edit) {
+    editDevices(edit, callback) {
         let newDevices = [...this.state.devices];
         edit(newDevices);
-        this.setState({
-            devices: newDevices
-        });
+        this.setState(
+            {
+                devices: newDevices
+            },
+            callback
+        );
     }
 
-    newEmptyDevice() {
+    editDevice(deviceId, edit, callback) {
+        this.editDevices(newDevices => {
+            for (let i = 0; i < newDevices.length; i++) {
+                if (newDevices[i].id === deviceId) {
+                    edit(newDevices[i]);
+                }
+            }
+        }, callback);
+    }
+
+    editDeviceData(deviceId, id, edit, callback) {
+        this.editDevice(
+            deviceId,
+            device => {
+                for (let entry of device.data) {
+                    if (entry.id === id) {
+                        edit(entry);
+                    }
+                }
+            },
+            callback
+        );
+    }
+
+    newEmptyDevice(id, name) {
         return {
-            id: "",
-            name: "",
+            id: id,
+            name: name,
             status: 0,
             data: [
                 {
-                    id: "con",
-                    name: "Verbindung",
-                    available: false,
-                    suffix: "ms",
-                    status: 0,
-                    active: true,
-                    fixed: true,
-                    minimum: 0,
-                    history: []
-                },
-                {
-                    id: "tre",
+                    id: "vib",
+                    trigger: "ReceiveVib",
                     name: "Erschütterungen",
-                    available: false,
-                    status: 0,
+                    value: 0,
+                    available: true,
+                    status: 1,
                     minimum: 0,
                     history: []
                 },
                 {
-                    id: "hum",
+                    id: "humid",
+                    trigger: "ReceiveHum",
                     name: "Feuchtigkeit",
                     available: false,
                     suffix: "%",
@@ -223,7 +237,8 @@ class Main extends React.Component {
                     history: []
                 },
                 {
-                    id: "tem",
+                    id: "temp",
+                    trigger: "ReceiveTemp",
                     name: "Temperatur",
                     available: false,
                     suffix: "°c",
@@ -231,42 +246,30 @@ class Main extends React.Component {
                     history: []
                 },
                 {
-                    id: "sys",
-                    name: "System",
-                    value: [
-                        {
-                            id: "cpu",
-                            name: "CPU",
-                            suffix: "%",
-                            status: 0,
-                            active: true
-                        },
-                        {
-                            id: "ram",
-                            name: "RAM",
-                            suffix: "%",
-                            status: 0,
-                            active: true
-                        },
-                        {
-                            id: "acs",
-                            name: "Aktive Sensoren",
-                            status: 0,
-                            nograph: true,
-                            active: true
-                        }
-                    ],
+                    id: "preassure",
+                    trigger: "ReceivePre",
+                    name: "Druck",
+                    available: false,
+                    suffix: "Pa",
+                    status: 0,
+                    history: []
+                },
+                {
+                    id: "battery",
+                    trigger: "ReceiveBat",
+                    name: "Batterie",
+                    suffix: "%",
                     available: false,
                     status: 0,
                     minimum: 0,
                     maximum: 100,
-                    suffix: "%",
+                    nograph: true,
                     active: true,
-                    fixed: true,
-                    history: []
+                    fixed: true
                 },
                 {
                     id: "gps",
+                    trigger: "ReceivePos",
                     name: "Position",
                     available: false,
                     status: 0,
@@ -278,26 +281,168 @@ class Main extends React.Component {
         };
     }
 
-    componentDidMount() {
-        this.openLogin();
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
-        //this.interval = setInterval(() => this.createValues(), 1000);
+    login(name, pw) {
+        this.restCall(
+            "user/" + name + "/" + pw,
+            data => {
+                if (!data) {
+                    this.openLogin(() => {}, true);
+                    return;
+                }
+                this.restCall(
+                    "user/" + this.uid,
+                    data => {
+                        this.setState({ kdNr: data.KdNr }, () => {
+                            this.restCall(
+                                "customer/" + data.KdNr,
+                                data => {
+                                    this.setState(
+                                        {
+                                            customer: data.Name
+                                        },
+                                        () => {
+                                            this.loadDevices(data);
+                                        }
+                                    );
+                                },
+                                () => {
+                                    this.openLogin(() => {}, true);
+                                }
+                            );
+                        });
+                    },
+                    () => {
+                        this.openLogin(() => {}, true);
+                    }
+                );
+            },
+            () => {
+                this.openLogin(() => {}, true);
+            }
+        );
+    }
 
+    loadDevices(data) {
+        this.restCall(
+            "device/" + data.KdNr,
+            data => {
+                for (let device of data) {
+                    this.setState(
+                        {
+                            devices: this.state.devices.concat(
+                                this.newEmptyDevice(
+                                    device.Id,
+                                    device.Bezeichnung
+                                )
+                            )
+                        },
+                        () => {
+                            this.loadSensors(device);
+                        }
+                    );
+                }
+            },
+            () => {
+                this.openLogin(() => {}, true);
+            }
+        );
+    }
+
+    loadSensors(device) {
+        this.restCall("config/" + device.Id, data => {
+            this.editDevices(
+                newDevices => {
+                    for (let newDevice of newDevices) {
+                        if (newDevice.id === device.Id) {
+                            let dData = newDevice.data;
+                            for (let sensor of dData) {
+                                for (let result of data) {
+                                    if (sensor.id === result.Sensortype) {
+                                        sensor.active = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                () =>
+                    this.openDashboard(() => {
+                        this.loadValues();
+                    })
+            );
+        });
+    }
+
+    loadValues() {
+        this.startConnection();
+        for (let device of this.state.devices) {
+            for (let sensor of device.data) {
+                this.restCall("values/" + device.id + "/" + sensor.id, data => {
+                    let total = 0;
+                    for (let entry of data) {
+                        total += entry.Value;
+                    }
+                    let subHistory = data.slice(
+                        data.length - 100,
+                        data.length
+                    );
+                    let history = [];
+                    for (let entry of subHistory) {
+                        history.push({
+                            timestamp: new Date(entry.Timestamp),
+                            value: entry.Value
+                        });
+                    }
+                    this.editDeviceData(
+                        device.id,
+                        sensor.id,
+                        deviceData => {
+                            deviceData.total = total;
+                            deviceData.totalLength = data.length;
+                            deviceData.history = history;
+                        },
+                        () => {
+                            if(data.length === 0){
+                                return;
+                            }
+                            this.enterData(
+                                device.id,
+                                sensor.id,
+                                data[data.length - 1].Value,
+                                data[data.length - 1].Timestamp,
+                                () => {
+                                    this.startConnectionListener(
+                                        sensor.trigger,
+                                        sensor.id
+                                    );
+                                }
+                            );
+                        }
+                    );
+                });
+            }
+        }
+    }
+
+    startConnection() {
         const hubConnection = new HubConnectionBuilder()
             .withUrl("http://localhost:5000/valueshub")
             .configureLogging(LogLevel.Information)
             .build();
 
         this.setState({ hubConnection }, () => {
-            this.state.hubConnection.start().then(function() {
-                console.log("connected");
-            });
-            this.state.hubConnection.on("ReceiveMessage", (user, message) => {
-                console.log(user + ": " + message);
-            });
+            this.state.hubConnection.start();
         });
+    }
+
+    startConnectionListener(trigger, id) {
+        this.state.hubConnection.on(trigger, (user, message) => {
+            this.enterData(user, id, message, new Date());
+        });
+    }
+
+    componentDidMount() {
+        this.openLogin(() => {});
     }
 
     render() {
@@ -310,12 +455,12 @@ class Main extends React.Component {
             {
                 name: "Dashboard",
                 symbol: "fas fa-tachometer-alt",
-                method: () => this.openDashboard()
+                method: () => this.openDashboard(() => {})
             },
             {
                 name: "Map",
                 symbol: "fas fa-map-marker-alt",
-                method: () => this.openMap()
+                method: () => this.openMap(() => {})
             }
         ];
 
@@ -327,10 +472,16 @@ class Main extends React.Component {
                         ? devices[selected].status
                         : -1
                 }
+                customer={this.state.customer}
             />
         );
-        let sidebar = (
-            <Sidebar buttons={buttons} logout={() => this.openLogin()} />
+        let sidebar = this.state.sidebar ? (
+            <Sidebar
+                buttons={buttons}
+                logout={() => this.openLogin(() => {})}
+            />
+        ) : (
+            ""
         );
 
         if (shown === "Loading") {
@@ -339,7 +490,7 @@ class Main extends React.Component {
             content = (
                 <Dashboard
                     devices={devices}
-                    onClick={device => this.openDetails(device)}
+                    onClick={device => this.openDetails(device, () => {})}
                     newDevice={() => {
                         let devices = this.state.devices.concat(
                             this.newEmptyDevice()
@@ -350,6 +501,7 @@ class Main extends React.Component {
                             selected: devices.length - 1
                         });
                     }}
+                    customer={this.state.customer}
                 />
             );
         } else if (shown === "Map") {
@@ -372,8 +524,15 @@ class Main extends React.Component {
                 />
             );
         } else if (shown === "Login") {
-            content = <Login onclick={() => this.openDashboard()} />;
-            sidebar = "";
+            content = (
+                <Login
+                    onclick={(name, pw) => {
+                        this.login(name, pw);
+                        this.openLoading(() => {});
+                    }}
+                    error={this.state.loginError}
+                />
+            );
         } else if (shown === "DeviceManager") {
             content = (
                 <DeviceManager
@@ -383,8 +542,8 @@ class Main extends React.Component {
                             : false
                     }
                     id={selected}
-                    error={() => this.openDashboard()}
-                    done={id => this.openDetails(id)}
+                    error={() => this.openDashboard(() => {})}
+                    done={id => this.openDetails(id, () => {})}
                     changeId={(value, id) => {
                         this.editDevices(devices => {
                             devices[id].id = value;
@@ -407,9 +566,9 @@ class Main extends React.Component {
         }
 
         return (
-            <div class="main">
+            <div className="main">
                 {sidebar}
-                <div class="mainContainer">
+                <div className="mainContainer">
                     {title}
                     {content}
                 </div>

@@ -69,14 +69,25 @@ body {
 }
 
 .title {
-    font-size: 400%;
-    font-weight: bold;
-    margin: 0.5em;
-    align-self: center;
+    width: 100%;
+    position: relative;
 }
 
 .titleWrapper {
+    font-size: 400%;
+    font-weight: bold;
+    margin: 0.5em;
     display: flex;
+    justify-content: center;
+}
+
+.customer {
+    position: absolute;
+    font-size: 200%;
+    font-weight: bold;
+    margin: 1.6em;
+    display: flex;
+    justify-content: center;
 }
 
 .titleStatus {
@@ -102,7 +113,7 @@ body {
 }
 
 .deviceWrapper {
-    flex: 0 0 31.67%;
+    flex: 0 0 calc(33.3333% - 3.5em);
     margin: 1em;
     border: 1px solid black;
     border-radius: 0.5em;
@@ -202,7 +213,7 @@ body {
 }
 
 .deviceDetailsStat {
-    flex: 0 0 48%;
+    flex: 0 0 calc(50% - 3.5em);
     margin: 1em;
     border: 1px solid black;
     border-radius: 0.5em;
@@ -258,7 +269,7 @@ body {
 
 .loginDetailsWrapper {
     display: flex;
-    width: 16%;
+    width: 22em;
     margin: 1em;
     align-items: center;
 }
@@ -311,7 +322,7 @@ input {
 }
 
 .newDeviceWrapper {
-    flex: 0 0 31.67%;
+    flex: 0 0 calc(33.3333% - 3.5em);
     margin: 1em;
     display: flex;
     align-items: center;
@@ -423,4 +434,12 @@ input {
 
 .graphWrapper {
     margin-top: 1em;
+}
+
+.loginInput.error {
+    border-color: red;
+}
+
+.label.error {
+    color: red;
 }

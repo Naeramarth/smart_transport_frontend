@@ -35,7 +35,7 @@ class Dashboard extends React.Component {
         }
 
         return (
-            <div class="dashboard">
+            <div className="dashboard">
                 {content}
                 <NewDevice onclick={() => this.props.newDevice()} />
             </div>

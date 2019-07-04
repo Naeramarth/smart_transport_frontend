@@ -24,23 +24,23 @@ class DeviceManager extends React.Component {
         ));
 
         return (
-            <div class="deviceManager">
-                <div class="deviceManagerElement">
-                    <div class="label">Gerätname</div>
-                    <div class="deviceManagerInputWrapper">
+            <div className="deviceManager">
+                <div className="deviceManagerElement">
+                    <div className="label">Gerätname</div>
+                    <div className="deviceManagerInputWrapper">
                         <input
-                            class="devicename deviceNameInput"
+                            className="devicename deviceNameInput"
                             value={device.name}
                             onChange={(event) => this.props.changeName(event.target.value, this.props.id)}
                         />
                     </div>
                 </div>
-                <div class="sensorSelectionWrapper">
-                    <div class="label">Sensoren</div>
-                    <div class="sensorSelection">{sensors}</div>
+                <div className="sensorSelectionWrapper">
+                    <div className="label">Sensoren</div>
+                    <div className="sensorSelection">{sensors}</div>
                 </div>
                 <div
-                    class="doneButton"
+                    className="doneButton"
                     onClick={() => this.props.done(this.props.id)}
                 >
                     Fertig

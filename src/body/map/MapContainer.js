@@ -13,8 +13,8 @@ const MapElement = compose(
         googleMapURL:
             "https://maps.googleapis.com/maps/api/js?key=AIzaSyAc--U1yrGHEQFhMVY9WB6Zb9IRbu24MW8&v=3.exp&libraries=geometry,drawing,places",
         loadingElement: <Loading />,
-        containerElement: <div class="mapContainer" />,
-        mapElement: <div class="mapElement" />
+        containerElement: <div className="mapContainer" />,
+        mapElement: <div className="mapElement" />
     }),
     withScriptjs,
     withGoogleMap

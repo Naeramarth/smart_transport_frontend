@@ -6,17 +6,17 @@ class SensorSelector extends React.Component {
             return "";
         }
         let active = this.props.active;
-        let content = <i class="far fa-square" />;
+        let content = <i className="far fa-square" />;
         if (active) {
-            content = <i class="far fa-check-square" />;
+            content = <i className="far fa-check-square" />;
         }
 
         return (
-            <div class="sensorSelector">
-                <div class="label">{this.props.name}</div>
-                <div class="checkboxWrapper">
+            <div className="sensorSelector">
+                <div className="label">{this.props.name}</div>
+                <div className="checkboxWrapper">
                     <div
-                        class="checkbox"
+                        className="checkbox"
                         onClick={() => this.props.onclick(this.props.index)}
                     >
                         {content}

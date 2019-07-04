@@ -32,15 +32,15 @@ class Device extends React.Component {
             />
         ));
         return (
-            <div class="deviceWrapper" onClick={() => this.props.onClick(id)}>
-                <div class="deviceHead">
+            <div className="deviceWrapper" onClick={() => this.props.onClick(id)}>
+                <div className="deviceHead">
                     <Status color={color} />
-                    <div class="deviceName">{name}</div>
-                    <div class="deviceMenu">
-                        <i class="fas fa-ellipsis-v" />
+                    <div className="deviceName">{name}</div>
+                    <div className="deviceMenu">
+                        <i className="fas fa-ellipsis-v" />
                     </div>
                 </div>
-                <div class="deviceBody">{content}</div>
+                <div className="deviceBody">{content}</div>
             </div>
         );
     }

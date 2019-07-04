@@ -55,7 +55,7 @@ class DeviceDetailsStatGraph extends React.Component {
             data: data
         };
         return (
-            <div class="graphWrapper">
+            <div className="graphWrapper">
                 <CanvasJSChart
                     options={options}
                 />

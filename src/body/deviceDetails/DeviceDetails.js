@@ -43,10 +43,10 @@ class DeviceDetails extends React.Component {
             ));
         }
         return (
-            <div class="deviceDetails">
+            <div className="deviceDetails">
                 {content}
-                <div class="editButton" onClick={() => this.props.editDevice()}>
-                    <i class="far fa-edit" />
+                <div className="editButton" onClick={() => this.props.editDevice()}>
+                    <i className="far fa-edit" />
                 </div>
             </div>
         );

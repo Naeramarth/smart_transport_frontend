@@ -57,7 +57,7 @@ class DeviceDetailsStat extends React.Component {
         if (this.props.positionData) {
             let zoom = 12;
             content = (
-                <div class="deviceDetailsMap">
+                <div className="deviceDetailsMap">
                     <MapContainer
                         device={device}
                         zoom={zoom}
@@ -65,30 +65,16 @@ class DeviceDetailsStat extends React.Component {
                     />
                 </div>
             );
-        } else if (Array.isArray(value)) {
-            let subContent = value.map((valueEntry, index) => (
-                <DeviceStat
-                    key={index}
-                    name={valueEntry.name}
-                    value={valueEntry.value}
-                    available={valueEntry.available}
-                    suffix={valueEntry.suffix}
-                    prefix={valueEntry.prefix}
-                    status={valueEntry.status}
-                    active={valueEntry.active}
-                />
-            ));
-            content = <div class="detailsStatWrapper">{subContent}</div>;
         } else if (!this.props.available) {
             content = "n/a";
         }
         return (
-            <div class="deviceDetailsStat">
-                <div class="deviceDetailsHead">
+            <div className="deviceDetailsStat">
+                <div className="deviceDetailsHead">
                     <Status color={color} />
-                    <div class="deviceDetailsname">{name}</div>
+                    <div className="deviceDetailsname">{name}</div>
                 </div>
-                <div class="deviceDetailsBody">
+                <div className="deviceDetailsBody">
                     {content}
                     {graph}
                 </div>
