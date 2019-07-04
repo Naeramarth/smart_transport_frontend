@@ -41,9 +41,13 @@ class Main extends React.Component {
         return data.json();
     }
 
-    restCall(path, callback, errorCallback, post) {
+    restCall(path, callback, errorCallback, method, body) {
         fetch("http://localhost:5000/api/" + path, {
-            method: post ? "post" : "get"
+            method: method ? method : "get",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
         })
             .then(this.status)
             .then(this.json)
@@ -163,7 +167,7 @@ class Main extends React.Component {
     }
 
     setDeviceStatus(deviceId) {
-        this.editDevice(deviceId, (device) => {
+        this.editDevice(deviceId, device => {
             let maxStatus = 0;
             for (let singleData of device.data) {
                 if (singleData.status > maxStatus && singleData.active) {
@@ -359,6 +363,7 @@ class Main extends React.Component {
                                 for (let result of data) {
                                     if (sensor.id === result.Sensortype) {
                                         sensor.active = true;
+                                        sensor.sensorId = result.Id;
                                     }
                                 }
                             }
@@ -382,10 +387,7 @@ class Main extends React.Component {
                     for (let entry of data) {
                         total += entry.Value;
                     }
-                    let subHistory = data.slice(
-                        data.length - 100,
-                        data.length
-                    );
+                    let subHistory = data.slice(data.length - 100, data.length);
                     let history = [];
                     for (let entry of subHistory) {
                         history.push({
@@ -402,7 +404,7 @@ class Main extends React.Component {
                             deviceData.history = history;
                         },
                         () => {
-                            if(data.length === 0){
+                            if (data.length === 0) {
                                 return;
                             }
                             this.enterData(
@@ -544,20 +546,49 @@ class Main extends React.Component {
                     id={selected}
                     error={() => this.openDashboard(() => {})}
                     done={id => this.openDetails(id, () => {})}
-                    changeId={(value, id) => {
-                        this.editDevices(devices => {
-                            devices[id].id = value;
-                        });
-                    }}
                     changeName={(value, id) => {
-                        this.editDevices(devices => {
-                            devices[id].name = value;
+                        this.editDevice(id, device => {
+                            device.name = value;
                         });
                     }}
                     changeData={(value, id) => {
-                        this.editDevices(devices => {
-                            devices[id].data = value;
+                        this.editDevice(id, device => {
+                            device.data = value;
                         });
+                    }}
+                    done={(id, changedSensors) => {
+                        this.restCall(
+                            "device/" + devices[selected].id,
+                            () => {},
+                            () => {},
+                            "put",
+                            {
+                                Bezeichnung: this.state.devices[selected].id
+                            }
+                        );
+                        for (let changedSensor of changedSensors) {
+                            let sensor = devices[selected].data[id];
+                            if (changedSensor.active) {
+                                this.restCall(
+                                    "config",
+                                    () => {},
+                                    () => {},
+                                    "post",
+                                    {
+                                        Sensortype: sensor.id,
+                                        deviceId: devices[selected].id
+                                    }
+                                );
+                            } else {
+                                this.restCall(
+                                    "config/" + sensor.sensorId,
+                                    () => {},
+                                    () => {},
+                                    "delete"
+                                );
+                            }
+                        }
+                        this.openDetails(selected, ()=>{});
                     }}
                 />
             );

@@ -2,6 +2,25 @@ import React from "react";
 import SensorSelector from "./SensorSelector";
 
 class DeviceManager extends React.Component {
+    constructor(props) {
+        super(props);
+        this.changedSensors = [];
+    }
+
+    changeSensor(id, device) {
+        device.data[id].active = !device.data[id].active;
+        for (let i in this.changedSensors) {
+            if (this.changedSensors[i].id === device.data[id].id) {
+                this.changedSensors.splice(i, 1);
+                return;
+            }
+        }
+        this.changedSensors.push({
+            id: device.data[id].id,
+            active: device.data[id].active
+        });
+    }
+
     render() {
         let device = this.props.device;
         if (!device) {
@@ -16,8 +35,8 @@ class DeviceManager extends React.Component {
                 id={data.id}
                 key={index}
                 index={index}
-                onclick={(id)=>{
-                    device.data[id].active = !device.data[id].active;
+                onclick={id => {
+                    this.changeSensor(id, device);
                     this.props.changeData(device.data, this.props.id);
                 }}
             />
@@ -31,7 +50,12 @@ class DeviceManager extends React.Component {
                         <input
                             className="devicename deviceNameInput"
                             value={device.name}
-                            onChange={(event) => this.props.changeName(event.target.value, this.props.id)}
+                            onChange={event =>
+                                this.props.changeName(
+                                    event.target.value,
+                                    this.props.id
+                                )
+                            }
                         />
                     </div>
                 </div>
@@ -41,7 +65,9 @@ class DeviceManager extends React.Component {
                 </div>
                 <div
                     className="doneButton"
-                    onClick={() => this.props.done(this.props.id)}
+                    onClick={() =>
+                        this.props.done(this.props.id, this.changedSensors)
+                    }
                 >
                     Fertig
                 </div>
