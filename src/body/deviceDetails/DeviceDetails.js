@@ -46,6 +46,9 @@ class DeviceDetails extends React.Component {
             <div className="deviceDetails">
                 {content}
                 <div className="buttonWrapper">
+                    <div className="deviceButton" onClick={() => this.props.resetDevice()}>
+                        <i className="fas fa-sync-alt"></i>
+                    </div>
                     <div className="deviceButton" onClick={() => this.props.editDevice()}>
                         <i className="far fa-edit" />
                     </div>

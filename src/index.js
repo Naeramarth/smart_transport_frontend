@@ -520,13 +520,30 @@ class Main extends React.Component {
         }
     }
 
-    deleteDevice(id){
-        this.restCall(
-            "device/" + id,
-            () => {},
-            () => {},
-            "delete"
-        );
+    deleteDevice(id) {
+        this.restCall("device/" + id, () => {}, () => {}, "delete");
+    }
+
+    resetDevice(id) {
+        this.restCall("device/resetDevice/" + id, (data) => {
+            if(data){
+                this.editDevice(device=>{
+                    device.status = 0;
+                    for(let data of device.data){
+                        data.history = [];
+                        if(data.vib){
+                            data.value = 0;
+                            data.status = 1;
+                            data.available = true;
+                        }else{
+                            data.value = "";
+                            data.status = 0;
+                            data.available = false;
+                        }
+                    }
+                });
+            }
+        }, () => {}, "get");
     }
 
     componentDidMount() {
@@ -616,16 +633,27 @@ class Main extends React.Component {
                         this.openDeviceManager(() => {});
                     }}
                     deleteDevice={() => {
-                        let confirmed = window.confirm("Sind Sie sicher, dass Sie dieses Gerät löschen wollen?");
-                        if(!confirmed){
+                        let confirmed = window.confirm(
+                            "Sind Sie sicher, dass Sie dieses Gerät löschen wollen?"
+                        );
+                        if (!confirmed) {
                             return;
                         }
-                        this.openDashboard(()=>{
-                            this.editDevices((devices)=>{
+                        this.openDashboard(() => {
+                            this.editDevices(devices => {
                                 let deleted = devices.splice(selected, 1);
                                 this.deleteDevice(deleted[0].id);
-                            })
+                            });
                         });
+                    }}
+                    resetDevice={() => {
+                        let confirmed = window.confirm(
+                            "Sind Sie sicher, dass Sie dieses Gerät resetten wollen?"
+                        );
+                        if (!confirmed) {
+                            return;
+                        }
+                        this.resetDevice(selected);
                     }}
                 />
             );
