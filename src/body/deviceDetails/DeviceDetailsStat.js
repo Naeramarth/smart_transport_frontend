@@ -1,6 +1,5 @@
 import React from "react";
 import Status from "../Status";
-import DeviceStat from "../DeviceStat";
 import MapContainer from "../map/MapContainer";
 import DeviceDetailsStatGraph from "./DeviceDetailsStatGraph";
 

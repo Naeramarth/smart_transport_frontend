@@ -176,10 +176,10 @@ class Main extends React.Component {
                                 timestamp: timestamp,
                                 value: 1
                             });
-                            if(this.vibTimer){
+                            if (this.vibTimer) {
                                 clearTimeout(this.vibTimer);
                             }
-                            this.vibTimer = setTimeout(()=>{
+                            this.vibTimer = setTimeout(() => {
                                 this.enterData(deviceId, id, false, new Date());
                             }, 1000);
                         } else {
@@ -456,13 +456,13 @@ class Main extends React.Component {
                                             data[i].Timestamp - 1000 >
                                             data[i + 1].Timestamp
                                         ) {
-                                            arr.push({
+                                            arr.unshift({
                                                 Timestamp:
                                                     data[i].Timestamp - 1000,
                                                 Value: 0
                                             });
                                         }
-                                        arr.push({
+                                        arr.unshift({
                                             Timestamp: data[i].Timestamp,
                                             Value: 1
                                         });
@@ -471,13 +471,13 @@ class Main extends React.Component {
                                             data[i].Timestamp + 1000 <
                                                 data[i - 1].Timestamp
                                         ) {
-                                            arr.push({
+                                            arr.unshift({
                                                 Timestamp:
                                                     data[i].Timestamp + 1000,
                                                 Value: 0
                                             });
                                         }
-                                        if(i === 0){
+                                        if (i === 0) {
                                             arr.push({
                                                 Timestamp:
                                                     data[i].Timestamp + 1000,
@@ -598,7 +598,9 @@ class Main extends React.Component {
 
     updateDevice(devices, id, changedSensors) {
         this.restCall("device/" + devices[id].id, () => {}, () => {}, "put", {
-            Bezeichnung: this.state.devices[id].id
+            Id: devices[id].id,
+            Bezeichnung: this.state.devices[id].name,
+            KdNr: this.state.kdNr
         });
         for (let changedSensor of changedSensors) {
             this.editDeviceData(devices[id].id, changedSensor.id, sensor => {
@@ -812,7 +814,6 @@ class Main extends React.Component {
                     }
                     id={selected}
                     error={() => this.openDashboard(() => {})}
-                    done={id => this.openDetails(id, () => {})}
                     changeName={(value, id) => {
                         this.editDevices(devices => {
                             devices[id].name = value;
