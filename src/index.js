@@ -122,7 +122,9 @@ class Main extends React.Component {
     }
 
     openDeviceManager(callback) {
-        this.setState({ shown: "DeviceManager" }, () => callback());
+        this.setState({ shown: "DeviceManager", sidebar: false }, () =>
+            callback()
+        );
     }
 
     enterData(deviceId, id, value, timestamp, callback) {
@@ -270,6 +272,16 @@ class Main extends React.Component {
                     history: []
                 },
                 {
+                    id: "gps",
+                    trigger: "ReceivePos",
+                    name: "Position",
+                    available: false,
+                    status: 0,
+                    positionData: true,
+                    nograph: true,
+                    history: []
+                },
+                {
                     id: "battery",
                     trigger: "ReceiveBat",
                     name: "Batterie",
@@ -281,16 +293,6 @@ class Main extends React.Component {
                     nograph: true,
                     active: true,
                     fixed: true
-                },
-                {
-                    id: "gps",
-                    trigger: "ReceivePos",
-                    name: "Position",
-                    available: false,
-                    status: 0,
-                    positionData: true,
-                    nograph: true,
-                    history: []
                 }
             ]
         };
@@ -457,6 +459,7 @@ class Main extends React.Component {
                     );
                 }
             }
+            this.setDeviceStatus(device.id);
         }
     }
 
@@ -504,49 +507,41 @@ class Main extends React.Component {
         );
     }
 
-    updateDevice(devices, selected, id, changedSensors) {
-        this.restCall(
-            "device/" + devices[selected].id,
-            () => {},
-            () => {},
-            "put",
-            {
-                Bezeichnung: this.state.devices[selected].id
-            }
-        );
+    updateDevice(devices, id, changedSensors) {
+        this.restCall("device/" + devices[id].id, () => {}, () => {}, "put", {
+            Bezeichnung: this.state.devices[id].id
+        });
         for (let changedSensor of changedSensors) {
-            let sensor = devices[selected].data[id];
-            if (changedSensor.active) {
-                this.restCall(
-                    "config",
-                    () => {
-                        this.restCall(
-                            "config/" + devices[selected].id,
-                            data => {
+            this.editDeviceData(devices[id].id, changedSensor.id, sensor => {
+                if (changedSensor.active) {
+                    this.restCall(
+                        "config",
+                        () => {
+                            this.restCall("config/" + devices[id].id, data => {
                                 for (let newSensor of data) {
                                     if (newSensor.Sensortype === sensor.id) {
                                         sensor.sensorId = newSensor.Id;
                                         return;
                                     }
                                 }
-                            }
-                        );
-                    },
-                    () => {},
-                    "post",
-                    {
-                        Sensortype: sensor.id,
-                        deviceId: devices[selected].id
-                    }
-                );
-            } else {
-                this.restCall(
-                    "config/" + sensor.sensorId,
-                    () => {},
-                    () => {},
-                    "delete"
-                );
-            }
+                            });
+                        },
+                        () => {},
+                        "post",
+                        {
+                            Sensortype: sensor.id,
+                            deviceId: devices[id].id
+                        }
+                    );
+                } else {
+                    this.restCall(
+                        "config/" + sensor.sensorId,
+                        () => {},
+                        () => {},
+                        "delete"
+                    );
+                }
+            });
         }
     }
 
@@ -559,21 +554,25 @@ class Main extends React.Component {
             "device/resetDevice/" + id,
             data => {
                 if (data) {
-                    this.editDevice(device => {
-                        device.status = 0;
-                        for (let data of device.data) {
-                            data.history = [];
-                            if (data.vib) {
-                                data.value = 0;
-                                data.status = 1;
-                                data.available = true;
-                            } else {
-                                data.value = "";
-                                data.status = 0;
-                                data.available = false;
+                    this.editDevice(
+                        device => {
+                            for (let data of device.data) {
+                                data.history = [];
+                                if (data.vib) {
+                                    data.value = 0;
+                                    data.status = 1;
+                                    data.available = true;
+                                } else {
+                                    data.value = "";
+                                    data.status = 0;
+                                    data.available = false;
+                                }
                             }
+                        },
+                        () => {
+                            this.setDeviceStatus();
                         }
-                    });
+                    );
                 }
             },
             () => {},
@@ -719,17 +718,17 @@ class Main extends React.Component {
                         });
                     }}
                     changeData={(value, id) => {
-                        this.editDevices(devices => {
-                            devices[id].data = value;
-                        });
+                        this.editDevices(
+                            devices => {
+                                devices[id].data = value;
+                            },
+                            () => {
+                                this.setDeviceStatus(devices[selected].id);
+                            }
+                        );
                     }}
                     done={(id, changedSensors) => {
-                        this.updateDevice(
-                            devices,
-                            selected,
-                            id,
-                            changedSensors
-                        );
+                        this.updateDevice(devices, id, changedSensors);
                         this.openDetails(selected, () => {});
                     }}
                 />
