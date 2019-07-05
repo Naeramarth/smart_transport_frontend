@@ -754,7 +754,19 @@ class Main extends React.Component {
         let sidebar = this.state.sidebar ? (
             <Sidebar
                 buttons={buttons}
-                logout={() => this.openLogin(() => {})}
+                logout={() => {
+                    this.setState({
+                        shown: "Loading",
+                        devices: [],
+                        selected: -1,
+                        title: this.defaultTitle,
+                        loggedIn: false,
+                        customer: "",
+                        sidebar: false
+                    }, () => {
+                        this.openLogin(() => {});
+                    });
+                }}
             />
         ) : (
             ""
