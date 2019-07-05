@@ -3,7 +3,7 @@ import Status from "./Status";
 
 class DeviceStat extends React.Component {
     render() {
-        if (this.props.positionData || !this.props.active) {
+        if (this.props.positionData || this.props.vibrationData || !this.props.active) {
             return "";
         }
         let name = this.props.name;

@@ -28,6 +28,7 @@ class Device extends React.Component {
                 prefix={dataEntry.prefix}
                 status={dataEntry.status}
                 positionData={dataEntry.positionData}
+                vibrationData={dataEntry.vibrationData}
                 active={dataEntry.active}
             />
         ));

@@ -35,6 +35,8 @@ class DeviceDetails extends React.Component {
                     minimum={stat.minimum}
                     maximum={stat.maximum}
                     nograph={stat.nograph}
+                    nostatus={stat.nostatus}
+                    novalue={stat.novalue}
                     history={stat.history}
                     timestamp={stat.timestamp}
                     positionData={stat.positionData}
@@ -46,14 +48,23 @@ class DeviceDetails extends React.Component {
             <div className="deviceDetails">
                 {content}
                 <div className="buttonWrapper">
-                    <div className="deviceButton" onClick={() => this.props.resetDevice()}>
-                        <i className="fas fa-sync-alt"></i>
+                    <div
+                        className="deviceButton"
+                        onClick={() => this.props.resetDevice()}
+                    >
+                        <i className="fas fa-sync-alt" />
                     </div>
-                    <div className="deviceButton" onClick={() => this.props.editDevice()}>
+                    <div
+                        className="deviceButton"
+                        onClick={() => this.props.editDevice()}
+                    >
                         <i className="far fa-edit" />
                     </div>
-                    <div className="deviceButton" onClick={() => this.props.deleteDevice()}>
-                        <i className="far fa-trash-alt"></i>
+                    <div
+                        className="deviceButton"
+                        onClick={() => this.props.deleteDevice()}
+                    >
+                        <i className="far fa-trash-alt" />
                     </div>
                 </div>
             </div>

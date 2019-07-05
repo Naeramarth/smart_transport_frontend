@@ -50,10 +50,16 @@ class DeviceDetailsStat extends React.Component {
                 history={this.props.history}
             />
         );
+        let shownStatus = <Status color={color} />;
         if (this.props.nograph || !this.props.available) {
             graph = "";
         }
-        if (this.props.positionData) {
+        if(this.props.nostatus){
+            shownStatus = "";
+        }
+        if (this.props.novalue) {
+            content = "";
+        } else if (this.props.positionData) {
             let zoom = 12;
             content = (
                 <div className="deviceDetailsMap">
@@ -70,7 +76,7 @@ class DeviceDetailsStat extends React.Component {
         return (
             <div className="deviceDetailsStat">
                 <div className="deviceDetailsHead">
-                    <Status color={color} />
+                    {shownStatus}
                     <div className="deviceDetailsname">{name}</div>
                 </div>
                 <div className="deviceDetailsBody">

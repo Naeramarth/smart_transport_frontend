@@ -18,7 +18,6 @@ class Main extends React.Component {
         this.defaultTitle = "Smart Transport";
         this.interval = false;
         this.uid = 1;
-        this.vibTimer = false;
         this.state = {
             shown: "Loading",
             devices: [],
@@ -139,13 +138,11 @@ class Main extends React.Component {
                     return;
                 }
                 if (data.positionData) {
-                    value.lat = value.lat / 1000000000;
-                    value.lon = value.lon / 1000000000;
                     if (isNaN(value.lat) || isNaN(value.lon)) {
                         return;
                     }
                 }
-                if (data.id === "vib") {
+                if (data.vibrationData) {
                     if (value) {
                         value = 1;
                     } else {
@@ -156,19 +153,23 @@ class Main extends React.Component {
                 data.total += value;
                 data.totalLength += 1;
                 data.timestamp = timestamp;
-                data.status = this.determineStatus(
-                    data.total / data.totalLength,
-                    value
-                );
+                if (!data.nostatus) {
+                    data.status = this.determineStatus(
+                        data.total / data.totalLength,
+                        value
+                    );
+                }
                 if (data.available) {
-                    if (data.id === "vib") {
+                    if (data.vibrationData) {
                         if (value) {
                             if (
-                                timestamp - 1000 >
-                                data.history[data.history.length - 1]
+                                timestamp - 5000 >=
+                                    data.history[data.history.length - 1]
+                                        .timestamp &&
+                                data.history[data.history.length - 1].value
                             ) {
                                 data.history.push({
-                                    timestamp: timestamp - 1000,
+                                    timestamp: new Date(timestamp - 5000),
                                     value: 0
                                 });
                             }
@@ -179,11 +180,11 @@ class Main extends React.Component {
                             if (this.vibTimer) {
                                 clearTimeout(this.vibTimer);
                             }
-                            this.vibTimer = setTimeout(() => {
-                                this.enterData(deviceId, id, false, new Date());
-                            }, 1000);
                         } else {
-                            value = 0;
+                            data.history.push({
+                                timestamp: timestamp,
+                                value: 0
+                            });
                         }
                     } else {
                         data.history.push({
@@ -219,7 +220,11 @@ class Main extends React.Component {
         this.editDevice(deviceId, device => {
             let maxStatus = 0;
             for (let singleData of device.data) {
-                if (singleData.status > maxStatus && singleData.active) {
+                if (
+                    !singleData.nostatus &&
+                    singleData.status > maxStatus &&
+                    singleData.active
+                ) {
                     maxStatus = singleData.status;
                 }
             }
@@ -269,14 +274,16 @@ class Main extends React.Component {
             status: 0,
             data: [
                 {
-                    id: "vib",
+                    id: "vibra",
                     trigger: "ReceiveVib",
                     name: "Erschütterungen",
+                    vibrationData: true,
                     value: 0,
                     available: true,
-                    status: 1,
                     minimum: 0,
                     maximum: 1,
+                    nostatus: true,
+                    novalue: true,
                     history: []
                 },
                 {
@@ -316,6 +323,7 @@ class Main extends React.Component {
                     status: 0,
                     positionData: true,
                     nograph: true,
+                    nostatus: true,
                     history: []
                 },
                 {
@@ -329,7 +337,8 @@ class Main extends React.Component {
                     maximum: 100,
                     nograph: true,
                     active: true,
-                    fixed: true
+                    fixed: true,
+                    history: []
                 }
             ]
         };
@@ -445,42 +454,71 @@ class Main extends React.Component {
                         "values/" + device.id + "/" + sensor.id,
                         data => {
                             let total = 0;
-                            for (let entry of data) {
+                            for (let i = 0; i < data.length; i++) {
+                                let entry = data[i];
+                                entry.Timestamp = new Date(entry.Timestamp);
+                                if (
+                                    sensor.maximum !== undefined &&
+                                    sensor.maximum !== null &&
+                                    entry.Value > sensor.maximum
+                                ) {
+                                    data.splice(i, 1);
+                                    i--;
+                                    continue;
+                                }
+                                if (
+                                    sensor.minimum !== undefined &&
+                                    sensor.minimum !== null &&
+                                    entry.Value < sensor.minimum
+                                ) {
+                                    data.splice(i, 1);
+                                    i--;
+                                    continue;
+                                }
                                 total += entry.Value;
                             }
-                            if (sensor.id === "vib") {
+                            if (sensor.vibrationData) {
                                 let arr = [];
                                 for (let i in data) {
+                                    i = parseInt(i);
                                     if (data[i].Value) {
-                                        if (
-                                            data[i].Timestamp - 1000 >
-                                            data[i + 1].Timestamp
-                                        ) {
-                                            arr.unshift({
-                                                Timestamp:
-                                                    data[i].Timestamp - 1000,
-                                                Value: 0
-                                            });
-                                        }
-                                        arr.unshift({
-                                            Timestamp: data[i].Timestamp,
-                                            Value: 1
-                                        });
+                                        let minDate = new Date(
+                                            data[i].Timestamp - 5000
+                                        );
+                                        let maxDate = new Date(
+                                            data[i].Timestamp
+                                        );
+                                        maxDate.setSeconds(
+                                            maxDate.getSeconds() + 5
+                                        );
+                                        maxDate = new Date(maxDate);
                                         if (
                                             i !== 0 &&
-                                            data[i].Timestamp + 1000 <
-                                                data[i - 1].Timestamp
+                                            maxDate <= data[i - 1].Timestamp &&
+                                            data[i - 1].Value
                                         ) {
-                                            arr.unshift({
-                                                Timestamp:
-                                                    data[i].Timestamp + 1000,
+                                            arr.push({
+                                                Timestamp: maxDate,
                                                 Value: 0
                                             });
                                         }
                                         if (i === 0) {
                                             arr.push({
-                                                Timestamp:
-                                                    data[i].Timestamp + 1000,
+                                                Timestamp: maxDate,
+                                                Value: 0
+                                            });
+                                        }
+                                        arr.push({
+                                            Timestamp: data[i].Timestamp,
+                                            Value: 1
+                                        });
+                                        if (
+                                            i !== data.length - 1 &&
+                                            minDate >= data[i + 1].Timestamp &&
+                                            data[i + 1].Value
+                                        ) {
+                                            arr.push({
+                                                Timestamp: minDate,
                                                 Value: 0
                                             });
                                         }
@@ -493,7 +531,7 @@ class Main extends React.Component {
                             let subHistory = data.slice(0, 100).reverse();
                             let history = [];
                             for (let entry of subHistory) {
-                                if (sensor.id === "vib") {
+                                if (sensor.vibrationData) {
                                     if (entry.Value) {
                                         entry.Value = 1;
                                     } else {
@@ -501,7 +539,7 @@ class Main extends React.Component {
                                     }
                                 }
                                 history.push({
-                                    timestamp: new Date(entry.Timestamp),
+                                    timestamp: entry.Timestamp,
                                     value: entry.Value
                                 });
                             }
@@ -521,7 +559,7 @@ class Main extends React.Component {
                                         device.id,
                                         sensor.id,
                                         data[0].Value,
-                                        new Date(data[0].Timestamp)
+                                        data[0].Timestamp
                                     );
                                 }
                             );
@@ -543,7 +581,7 @@ class Main extends React.Component {
         this.setState({ hubConnection }, () => {
             this.state.hubConnection.start();
             this.state.hubConnection.on("ReceiveVib", (user, message) => {
-                this.enterData(user, "vib", message, new Date());
+                this.enterData(user, "vibra", message, new Date());
             });
             this.state.hubConnection.on("ReceiveHum", (user, message) => {
                 this.enterData(user, "humid", message, new Date());
@@ -642,7 +680,7 @@ class Main extends React.Component {
 
     resetDevice(id) {
         this.restCall(
-            "device/resetDevice/" + id,
+            "device/resetDevice/" + this.state.devices[id].id,
             data => {
                 if (data) {
                     this.editDevice(
@@ -678,11 +716,7 @@ class Main extends React.Component {
         }
         this.interval = setInterval(() => {
             for (let device of this.state.devices) {
-                for (let data of device.data) {
-                    if (data.id === "vib") {
-                        this.enterData(device.id, data.id, 0, new Date());
-                    }
-                }
+                this.enterData(device.id, "vibra", 0, new Date());
             }
         }, 5000);
     }

@@ -130,7 +130,7 @@ body {
 .deviceBody {
     display: flex;
     flex-wrap: wrap;
-    margin: 0.5em 0.5em 0.5em 1em;
+    margin: 0.5em 0.5em 1em 1em;
 }
 
 .deviceStatWrapper {
@@ -230,11 +230,13 @@ body {
 .deviceDetailsStatus {
     margin: 0.5em;
     font-size: 200%;
+    margin-right: -0.5em;
 }
 
 .deviceDetailsname {
     flex: 1 1 100%;
     font-size: 150%;
+    margin-left: 1.5em;
 }
 
 .deviceDetailsBody {
@@ -327,11 +329,11 @@ input {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 18.53em;
+    min-height: 10.96em;
 }
 
 .newDevice {
-    font-size: 750%;
+    font-size: 625%;
     cursor: pointer;
     color: grey;
 }
