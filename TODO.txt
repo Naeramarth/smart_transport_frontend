@@ -1,5 +1,0 @@
-gerätreset
-
-optional:
- - einzelne werte löschen
- - route
