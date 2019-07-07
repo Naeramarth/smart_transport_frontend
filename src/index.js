@@ -12,7 +12,10 @@ import Login from "./body/login/Login";
 import DeviceManager from "./body/deviceManager/DeviceManager";
 import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
 
+var http = false;
+
 class Main extends React.Component {
+
     constructor(props) {
         super(props);
         this.defaultTitle = "Smart Transport";
@@ -42,7 +45,12 @@ class Main extends React.Component {
     }
 
     restCall(path, callback, errorCallback, method, body) {
-        fetch("http://localhost:5000/api/" + path, {
+        let baseUrl = "https://localhost:5001/api/";
+        let obj = this;
+        if (http) {
+            baseUrl = "http://localhost:5000/api/";
+        }
+        fetch(baseUrl + path, {
             method: method ? method : "get",
             headers: {
                 "Content-Type": "application/json"
@@ -57,8 +65,19 @@ class Main extends React.Component {
                 }
             })
             .catch(function(error) {
-                if (errorCallback) {
-                    errorCallback();
+                if (!http) {
+                    http = true;
+                    obj.restCall(
+                        path,
+                        callback,
+                        errorCallback,
+                        method,
+                        body
+                    );
+                } else {
+                    if (errorCallback) {
+                        errorCallback();
+                    }
                 }
             });
     }
@@ -475,7 +494,7 @@ class Main extends React.Component {
                                     i--;
                                     continue;
                                 }
-                                if(i !== 0){
+                                if (i !== 0) {
                                     total += entry.Value;
                                 }
                             }
@@ -757,17 +776,20 @@ class Main extends React.Component {
             <Sidebar
                 buttons={buttons}
                 logout={() => {
-                    this.setState({
-                        shown: "Loading",
-                        devices: [],
-                        selected: -1,
-                        title: this.defaultTitle,
-                        loggedIn: false,
-                        customer: "",
-                        sidebar: false
-                    }, () => {
-                        this.openLogin(() => {});
-                    });
+                    this.setState(
+                        {
+                            shown: "Loading",
+                            devices: [],
+                            selected: -1,
+                            title: this.defaultTitle,
+                            loggedIn: false,
+                            customer: "",
+                            sidebar: false
+                        },
+                        () => {
+                            this.openLogin(() => {});
+                        }
+                    );
                 }}
             />
         ) : (
