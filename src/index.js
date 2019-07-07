@@ -475,7 +475,9 @@ class Main extends React.Component {
                                     i--;
                                     continue;
                                 }
-                                total += entry.Value;
+                                if(i !== 0){
+                                    total += entry.Value;
+                                }
                             }
                             if (sensor.vibrationData) {
                                 let arr = [];
@@ -548,7 +550,7 @@ class Main extends React.Component {
                                 sensor.id,
                                 deviceData => {
                                     deviceData.total = total;
-                                    deviceData.totalLength = data.length;
+                                    deviceData.totalLength = data.length - 1;
                                     deviceData.history = history;
                                 },
                                 () => {
