@@ -70,7 +70,12 @@ class Main extends React.Component {
                     obj.restCall(
                         path,
                         callback,
-                        errorCallback,
+                        ()=>{
+                            if (errorCallback) {
+                                errorCallback();
+                            }
+                            http = false;
+                        },
                         method,
                         body
                     );
