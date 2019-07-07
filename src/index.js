@@ -12,15 +12,13 @@ import Login from "./body/login/Login";
 import DeviceManager from "./body/deviceManager/DeviceManager";
 import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
 
-var http = false;
-
 class Main extends React.Component {
-
     constructor(props) {
         super(props);
         this.defaultTitle = "Smart Transport";
         this.interval = false;
         this.uid = 1;
+        this.http = false;
         this.state = {
             shown: "Loading",
             devices: [],
@@ -46,8 +44,7 @@ class Main extends React.Component {
 
     restCall(path, callback, errorCallback, method, body) {
         let baseUrl = "https://localhost:5001/api/";
-        let obj = this;
-        if (http) {
+        if (this.http) {
             baseUrl = "http://localhost:5000/api/";
         }
         fetch(baseUrl + path, {
@@ -65,24 +62,8 @@ class Main extends React.Component {
                 }
             })
             .catch(function(error) {
-                if (!http) {
-                    http = true;
-                    obj.restCall(
-                        path,
-                        callback,
-                        ()=>{
-                            if (errorCallback) {
-                                errorCallback();
-                            }
-                            http = false;
-                        },
-                        method,
-                        body
-                    );
-                } else {
-                    if (errorCallback) {
-                        errorCallback();
-                    }
+                if (errorCallback) {
+                    errorCallback();
                 }
             });
     }
@@ -599,8 +580,12 @@ class Main extends React.Component {
     }
 
     startConnection() {
+        let baseUrl = "https://localhost:5001/";
+        if (this.http) {
+            baseUrl = "http://localhost:5000/";
+        }
         const hubConnection = new HubConnectionBuilder()
-            .withUrl("http://localhost:5000/valueshub")
+            .withUrl(baseUrl + "valueshub")
             .configureLogging(LogLevel.Information)
             .build();
 
@@ -737,6 +722,12 @@ class Main extends React.Component {
 
     componentDidMount() {
         this.openLogin(() => {});
+        fetch("https://localhost:5001/api/customer")
+            .then(this.status)
+            .then(this.json)
+            .catch(function() {
+                this.http = true;
+            });
         if (this.interval) {
             clearInterval(this.interval);
         }
